@@ -33,4 +33,11 @@ return[
      */
 
     'database' => env('CHAT_DB_NAME') ?: "admin_user_chat",
+
+    /**
+     * which auth middleware should be use
+     * sanctum is used by default
+     */
+
+    'auth' => 'auth:sanctum',
 ];
