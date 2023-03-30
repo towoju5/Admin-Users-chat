@@ -1,0 +1,54 @@
+{
+    "name": "towoju5/admin-user-chat",
+    "description": "A simple package to initiate chat between admin and the users/customers via api ",
+    "keywords": [
+        "towoju5",
+        "admin-user-chat"
+    ],
+    "homepage": "https://github.com/towoju5/admin-user-chat",
+    "license": "MIT",
+    "type": "library",
+    "authors": [
+        {
+            "name": "EMMANUEL TOWOJU",
+            "email": "towojuads@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.4|^8.0",
+        "illuminate/support": "^8.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^6.0",
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Towoju5\\AdminUserChat\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Towoju5\\AdminUserChat\\Tests\\": "tests"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Towoju5\\AdminUserChat\\AdminUserChatServiceProvider"
+            ],
+            "aliases": {
+                "AdminUserChat": "Towoju5\\AdminUserChat\\AdminUserChatFacade"
+            }
+        }
+    }
+}
