@@ -4,6 +4,7 @@ namespace Towoju5\AdminUserChat;
 
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
+use Illuminate\Http\Request;
 
 class AdminUserChat
 {
@@ -31,8 +32,10 @@ class AdminUserChat
      * @param $sender_id
      * @param $message
      */
-    public function sendMessageToAllAdministrators($sender_id, $message)
+    public function sendMessageToAllAdministrators(Request $request)
     {
+        $sender_id = auth()->id();
+        $message = $request->message;
         foreach ($this->getAdministrators() as $administrator) {
             $this->send($sender_id, $this->validateAdminID($administrator), $message);
         }
@@ -45,8 +48,10 @@ class AdminUserChat
      * @param $message
      * @return mixed
      */
-    public function sendMessageToAdministrator($sender, $recipient, $message)
+    public function sendMessageToAdministrator(Request $request, $recipient)
     {
+        $sender = auth()->id();
+        $message = $request->message;
         return $this->send($sender, $recipient, $message);
     }
     /**
@@ -111,8 +116,9 @@ class AdminUserChat
         return $this;
     }
 
-    public function getMessagesByUser($userId)
+    public function getMessagesByUser()
     {
+        $userId = request()->user()->id;
         $messages = DB::table(config($this->configFileName . '.database'))->where('sender', $userId)->limit(100)->get();
         return $messages;
     }
