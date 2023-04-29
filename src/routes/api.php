@@ -17,7 +17,9 @@ use Towoju5\AdminUserChat\AdminUserChat;
 
 Route::group(['prefix' => 'api'], function () {
       Route::group(['middleware' => 'auth:sanctum', 'prefix' => 'woju-chat'], function () {
-            Route::get('/',               [AdminUserChat::class, 'getMessagesByUser']);
+            Route::get('/',               [AdminUserChat::class, 'getAllMessage']);
+            Route::post('send',           [AdminUserChat::class, 'send_message']);
+            Route::get('user/{id}',       [AdminUserChat::class, 'getUserMessages']);
             Route::post('user/{id}',      [AdminUserChat::class, 'sendMessageToUser']);
             Route::post('all-admins',     [AdminUserChat::class, 'sendMessageToAllUsers']);
             Route::post('admin/{id}',     [AdminUserChat::class, 'sendMessageToAdministrator']);
