@@ -5,6 +5,7 @@ namespace Towoju5\AdminUserChat;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class AdminUserChat
 {
@@ -83,7 +84,7 @@ class AdminUserChat
         return DB::insert(
             'insert into ' . config($this->configFileName . '.database') .
                 '(sender,recipient,message,message_key,deleted_by_admin,deleted_by_user) values (?, ?, ?, ?, ?, ?)',
-            [$sender, $recipient, $message, md5(str_random() . time()), false, false]
+            [$sender, $recipient, $message, md5(Str::random(8) . time()), false, false]
         );
     }
 
@@ -96,8 +97,9 @@ class AdminUserChat
      */
     public function sendMessageToUser(Request $request, $recipient)
     {
-        $sender = auth()->id();
-        return $this->send($sender, $recipient, $request->message);
+        $sender = 0;
+        $msg = $this->send($sender, $recipient, $request->message);
+        return self::response($msg);
     }
 
     /**
@@ -113,20 +115,63 @@ class AdminUserChat
         foreach (self::users() as $user) {
             $this->send($sender, $user->id, $request->message);
         }
-        return $this;
+        return self::response($this);
     }
 
-    public function getMessagesByUser()
+    public function getUserMessages()
     {
         $userId = request()->user()->id;
-        $messages = DB::table(config($this->configFileName . '.database'))->where('sender', $userId)->limit(100)->get();
-        return $messages;
+        $messages = DB::table(config($this->configFileName . '.database'))
+                        ->where('sender', $userId)
+                        ->orWhere('recipient', $userId)
+                        ->orderBy('created_at', 'desc')
+                        ->paginate();
+        return self::response($messages);
     }
 
     public function getMessagesByAdmin($userId)
     {
         $messages = DB::table(config($this->configFileName . '.database'))->where('sender', $userId)->groupBy('sender')->get();
-        return $messages;
+        return self::response($messages);
+    }
+
+    public function send_message(Request $request)
+    {
+        $sender = $request->user()->id;
+        $message = $request->message;
+        $recipient = 0;
+        $send = $this->send($sender, $recipient, $message);
+        return self::response($send);
+    }
+
+    /**
+     * Admin get all messages
+     */
+    public function getAllMessage()
+    {
+        $userId = request()->user()->id;
+        $tbl = config($this->configFileName . '.database');
+        DB::statement("SET SQL_MODE=''");
+        $messages = DB::table($tbl)->join('users', "users.id", "=", "$tbl.sender")->groupBy("sender")->where('sender', $userId)->paginate()->through(fn($data) => [
+            'id'            =>  $data->id,
+            'sender_id'     =>  $data->sender,
+            'sender'        =>  $data->name,
+            'message'       =>  $data->message,
+            'message_key'   =>  $data->message_key,
+            'created_at'    =>  $data->created_at
+        ]);
+        return self::response($messages);
+    }
+
+    private function response($obj)
+    {
+        $result = [
+            'status'    =>  true,
+            'message'   =>  'success',
+            'data'      =>  $obj
+        ];
+
+        return $result;
     }
 
     private function users()
